@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Study Planner</title>
+    
+    <!-- iOS Web App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Study Tracker">
+
+    <!-- Google Aesthetic Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-color: #FAF6F0;
+            --card-bg: #FFFFFF;
+            --text-dark: #4A403A;
+            --shadow-soft: 0 10px 25px rgba(180, 160, 150, 0.15);
+            --border-radius: 20px;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 25px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-family: 'Caveat', cursive;
+            font-size: 3rem;
+            margin: 0;
+            color: #6C5CE7;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            margin: 5px 0 0 0;
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+
+        /* Revision Reminder Box */
+        .reminder-card {
+            background-color: #FFF4E5;
+            border: 2px dashed #FFB74D;
+            border-radius: var(--border-radius);
+            padding: 18px 25px;
+            margin-bottom: 25px;
+            display: none;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .reminder-card h3 {
+            font-family: 'Caveat', cursive;
+            font-size: 1.8rem;
+            margin: 0 0 10px 0;
+            color: #D97706;
+        }
+
+        .reminder-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .reminder-list li {
+            font-size: 1.05rem;
+            margin-bottom: 5px;
+        }
+
+        /* Layout Grid */
+        .app-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .app-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Form & Calendar Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .form-title {
+            font-family: 'Caveat', cursive;
+            font-size: 2.2rem;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #4A403A;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #F0EAE1;
+            border-radius: 12px;
+            background-color: #FAF8F5;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            color: var(--text-dark);
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: #C7B8EA;
+        }
+
+        button.btn-submit {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%);
+            color: #4A403A;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(200, 180, 220, 0.4);
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
+        }
+
+        button.btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        /* FullCalendar Customizations */
+        .fc {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .fc-toolbar-title {
+            font-family: 'Caveat', cursive !important;
+            font-size: 2.2rem !important;
+            color: var(--text-dark);
+        }
+
+        .fc-button-primary {
+            background-color: #F0EAE1 !important;
+            border: none !important;
+            color: var(--text-dark) !important;
+            border-radius: 10px !important;
+            font-weight: 500 !important;
+            text-transform: capitalize !important;
+        }
+
+        .fc-button-active {
+            background-color: #E2D9CC !important;
+        }
+
+        .fc-theme-standard td, .fc-theme-standard th {
+            border-color: #F4EFEA !important;
+        }
+
+        .fc-daygrid-day-number {
+            font-weight: 500;
+            color: #8C827A;
+            padding: 8px !important;
+        }
+
+        .fc-event {
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 4px 8px !important;
+            font-size: 0.85rem !important;
+            font-weight: 500 !important;
+            color: #333333 !important;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>✿ Medical Study Companion ✿</h1>
+        <p>Keep track of your studies & review on time</p>
+    </header>
+
+    <!-- Revision Reminder Box -->
+    <div id="reminder-box" class="reminder-card">
+        <h3>✨ Time to Review! (3 Days Spaced Repetition)</h3>
+        <ul id="reminder-list" class="reminder-list"></ul>
+    </div>
+
+    <div class="app-grid">
+        <!-- Input Form -->
+        <div class="card">
+            <h2 class="form-title">Log Today's Topic</h2>
+            <form id="study-form">
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <select id="subject" required>
+                        <option value="Anatomy">Anatomy (Pastel Red)</option>
+                        <option value="Biochemistry">Biochemistry (Pastel Green)</option>
+                        <option value="Physiology">Physiology (Pastel Orange)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="subtopic">Sub-topic</label>
+                    <input type="text" id="subtopic" placeholder="e.g., Upper Limb / Glycolysis" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="date_studied">Date Studied</label>
+                    <input type="date" id="date_studied" required>
+                </div>
+
+                <button type="submit" class="btn-submit">Add to Calendar ✦</button>
+            </form>
+        </div>
+
+        <!-- Calendar Panel -->
+        <div class="card">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date in date picker by default
+            var todayStr = new Date().toISOString().substring(0, 10);
+            document.getElementById('date_studied').value = todayStr;
+
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth'
+                },
+                height: 'auto'
+            });
+            calendar.render();
+
+            function loadData() {
+                fetch('/get_data')
+                .then(res => res.json())
+                .then(data => {
+                    calendar.removeAllEvents();
+
+                    data.study_logs.forEach(item => {
+                        calendar.addEvent({
+                            title: item.subject + ': ' + item.subtopic,
+                            start: item.date_studied,
+                            backgroundColor: item.color,
+                            textColor: '#2D2727'
+                        });
+                    });
+
+                    // Manage Revision Reminders
+                    if (data.reminders.length > 0) {
+                        var alertBox = document.getElementById('reminder-box');
+                        var reminderList = document.getElementById('reminder-list');
+                        reminderList.innerHTML = '';
+
+                        data.reminders.forEach(r => {
+                            var li = document.createElement('li');
+                            li.innerHTML = `<strong>${r.subject}</strong>: ${r.subtopic} <i>(Studied on ${r.date_studied})</i>`;
+                            reminderList.appendChild(li);
+                        });
+                        alertBox.style.display = 'block';
+                    }
+                });
+            }
+
+            document.getElementById('study-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                var payload = {
+                    subject: document.getElementById('subject').value,
+                    subtopic: document.getElementById('subtopic').value,
+                    date_studied: document.getElementById('date_studied').value
+                };
+
+                fetch('/add_study', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        loadData();
+                        document.getElementById('subtopic').value = '';
+                    }
+                });
+            });
+
+            loadData();
+        });
+    </script>
+</body>
+</html>
