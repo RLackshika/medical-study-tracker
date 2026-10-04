@@ -2,331 +2,585 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Study Planner</title>
-    
-    <!-- iOS Web App Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#F3F0FA">
+    <title>Med Study Planner</title>
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Study Tracker">
+    <meta name="apple-mobile-web-app-title" content="Study Planner">
 
-    <!-- Google Aesthetic Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- FullCalendar CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --bg-color: #FAF6F0;
-            --card-bg: #FFFFFF;
-            --text-dark: #4A403A;
-            --shadow-soft: 0 10px 25px rgba(180, 160, 150, 0.15);
-            --border-radius: 20px;
+            --mist: #F3F0FA;
+            --paper: #FFFFFF;
+            --ink: #3A3752;
+            --ink-soft: #6E6A8A;
+            --line: #E8E3F4;
+            --lilac: #D8CCF5;
+            --lilac-strong: #C6B7F0;
+            --lilac-deep: #7C69C9;
+            --rose: #FFC4CF;
+            --rose-deep: #B4506A;
+            --shadow: 0 12px 30px rgba(124, 105, 201, 0.10);
+            --serif: 'Fraunces', Georgia, serif;
+            --sans: 'Figtree', system-ui, sans-serif;
         }
 
+        * { box-sizing: border-box; }
+
         body {
-            font-family: 'Fredoka', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-dark);
             margin: 0;
-            padding: 25px;
+            padding: max(22px, env(safe-area-inset-top)) 22px 40px;
+            font-family: var(--sans);
+            color: var(--ink);
+            background:
+                radial-gradient(900px 400px at 85% -10%, #FBE4EA 0%, transparent 60%),
+                radial-gradient(800px 380px at -5% 0%, #DDEFF9 0%, transparent 60%),
+                var(--mist);
+            background-attachment: fixed;
             -webkit-tap-highlight-color: transparent;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
+        .wrap { max-width: 1240px; margin: 0 auto; }
 
-        header h1 {
-            font-family: 'Caveat', cursive;
-            font-size: 3rem;
-            margin: 0;
-            color: #6C5CE7;
-            letter-spacing: 1px;
+        /* ---------- header ---------- */
+        .top {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 22px;
         }
-
-        header p {
-            margin: 5px 0 0 0;
-            font-size: 1rem;
-            opacity: 0.7;
+        .top h1 {
+            font-family: var(--serif);
+            font-weight: 600;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            line-height: 1.1;
+            margin: 0 0 6px;
+            letter-spacing: -0.01em;
         }
+        .top p { margin: 0; color: var(--ink-soft); font-size: 1.02rem; }
 
-        /* Revision Reminder Box */
-        .reminder-card {
-            background-color: #FFF4E5;
-            border: 2px dashed #FFB74D;
-            border-radius: var(--border-radius);
-            padding: 18px 25px;
-            margin-bottom: 25px;
-            display: none;
-            box-shadow: var(--shadow-soft);
+        .pulse { width: 240px; max-width: 38vw; height: auto; flex-shrink: 0; }
+        .pulse path {
+            fill: none;
+            stroke: #F2A0B5;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 1;
+            stroke-dashoffset: 1;
+            animation: draw 2.4s ease-out 0.2s forwards;
         }
+        @keyframes draw { to { stroke-dashoffset: 0; } }
 
-        .reminder-card h3 {
-            font-family: 'Caveat', cursive;
-            font-size: 1.8rem;
-            margin: 0 0 10px 0;
-            color: #D97706;
-        }
-
-        .reminder-list {
-            margin: 0;
-            padding-left: 20px;
-        }
-
-        .reminder-list li {
-            font-size: 1.05rem;
-            margin-bottom: 5px;
-        }
-
-        /* Layout Grid */
-        .app-grid {
+        /* ---------- stats strip ---------- */
+        .stats {
             display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 25px;
-        }
-
-        @media (max-width: 900px) {
-            .app-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Form & Calendar Cards */
-        .card {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 25px;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .form-title {
-            font-family: 'Caveat', cursive;
-            font-size: 2.2rem;
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: #4A403A;
-        }
-
-        .form-group {
+            grid-template-columns: repeat(4, 1fr);
+            background: var(--paper);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
             margin-bottom: 18px;
         }
-
-        label {
+        .stat { padding: 16px 22px; }
+        .stat + .stat { border-left: 1px solid var(--line); }
+        .stat b {
             display: block;
-            font-size: 0.95rem;
-            font-weight: 500;
-            margin-bottom: 8px;
+            font-family: var(--serif);
+            font-weight: 600;
+            font-size: 1.9rem;
+            line-height: 1.1;
+        }
+        .stat span { font-size: 0.9rem; color: var(--ink-soft); }
+        .stat.due b { color: var(--rose-deep); }
+
+        /* ---------- subject filter ---------- */
+        .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.7);
+            font: 500 0.95rem var(--sans);
+            color: var(--ink);
+            cursor: pointer;
+        }
+        .chip i { width: 12px; height: 12px; border-radius: 50%; background: var(--c, var(--lilac)); }
+        .chip[aria-pressed="true"] { background: var(--paper); border-color: var(--lilac-strong); }
+
+        /* ---------- layout ---------- */
+        .grid { display: grid; grid-template-columns: 350px 1fr; gap: 20px; align-items: start; }
+        .side { display: grid; gap: 20px; }
+        @media (max-width: 960px) {
+            .grid { grid-template-columns: 1fr; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .stat:nth-child(3) { border-left: none; }
+            .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+            .pulse { display: none; }
         }
 
+        .card {
+            background: var(--paper);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        .card h2 {
+            font-family: var(--serif);
+            font-weight: 600;
+            font-size: 1.35rem;
+            margin: 0 0 4px;
+        }
+        .card .sub { margin: 0 0 16px; color: var(--ink-soft); font-size: 0.93rem; }
+
+        /* ---------- due list ---------- */
+        .due-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+        .due-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 4px 12px;
+            align-items: center;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: color-mix(in srgb, var(--c) 35%, white);
+            border-left: 6px solid var(--c);
+        }
+        .due-item .name { font-weight: 600; }
+        .due-item .meta { grid-column: 1; font-size: 0.85rem; color: var(--ink-soft); }
+        .due-item button { grid-row: 1 / span 2; grid-column: 2; }
+        .empty { color: var(--ink-soft); font-size: 0.95rem; margin: 0; }
+
+        .steps { display: inline-flex; gap: 4px; vertical-align: middle; margin-left: 6px; }
+        .steps i { width: 8px; height: 8px; border-radius: 50%; background: rgba(58, 55, 82, 0.15); }
+        .steps i.on { background: var(--lilac-deep); }
+
+        /* ---------- form ---------- */
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-weight: 500; font-size: 0.93rem; margin-bottom: 6px; }
         input, select {
             width: 100%;
-            padding: 14px;
-            border: 2px solid #F0EAE1;
+            padding: 12px 14px;
+            border: 2px solid var(--line);
             border-radius: 12px;
-            background-color: #FAF8F5;
-            font-family: 'Fredoka', sans-serif;
-            font-size: 1rem;
-            color: var(--text-dark);
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.2s ease;
+            background: #FBFAFE;
+            font: 1rem var(--sans);
+            color: var(--ink);
         }
+        input:focus, select:focus { outline: none; border-color: var(--lilac-strong); }
+        .hint { margin: 10px 0 0; font-size: 0.85rem; color: var(--ink-soft); }
 
-        input:focus, select:focus {
-            border-color: #C7B8EA;
-        }
-
-        button.btn-submit {
-            width: 100%;
-            padding: 15px;
+        .btn {
             border: none;
             border-radius: 12px;
-            background: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%);
-            color: #4A403A;
-            font-family: 'Fredoka', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 600;
+            padding: 12px 18px;
+            font: 600 1rem var(--sans);
+            color: var(--ink);
+            background: var(--lilac);
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(200, 180, 220, 0.4);
-            transition: transform 0.1s ease, box-shadow 0.2s ease;
+            transition: background 0.15s ease, transform 0.1s ease;
         }
+        .btn:hover { background: var(--lilac-strong); }
+        .btn:active { transform: scale(0.98); }
+        .btn.block { width: 100%; }
+        .btn.small { padding: 8px 14px; font-size: 0.9rem; border-radius: 10px; background: #fff; }
+        .btn.small:hover { background: var(--lilac); }
+        .btn.danger { background: #FFE3E8; color: var(--rose-deep); }
+        .btn.danger:hover { background: var(--rose); }
 
-        button.btn-submit:active {
-            transform: scale(0.98);
+        :focus-visible { outline: 3px solid var(--lilac-deep); outline-offset: 2px; }
+
+        /* ---------- calendar ---------- */
+        .fc { font-family: var(--sans); --fc-today-bg-color: #F6F1FF; --fc-border-color: #F0ECF8; }
+        .fc-toolbar-title { font-family: var(--serif) !important; font-weight: 600; font-size: 1.5rem !important; }
+        .fc .fc-button-primary {
+            background: #F1EDF9; border: none; color: var(--ink);
+            border-radius: 10px; font-weight: 500; text-transform: capitalize; box-shadow: none !important;
         }
-
-        /* FullCalendar Customizations */
-        .fc {
-            font-family: 'Fredoka', sans-serif;
-        }
-
-        .fc-toolbar-title {
-            font-family: 'Caveat', cursive !important;
-            font-size: 2.2rem !important;
-            color: var(--text-dark);
-        }
-
-        .fc-button-primary {
-            background-color: #F0EAE1 !important;
-            border: none !important;
-            color: var(--text-dark) !important;
-            border-radius: 10px !important;
-            font-weight: 500 !important;
-            text-transform: capitalize !important;
-        }
-
-        .fc-button-active {
-            background-color: #E2D9CC !important;
-        }
-
-        .fc-theme-standard td, .fc-theme-standard th {
-            border-color: #F4EFEA !important;
-        }
-
-        .fc-daygrid-day-number {
-            font-weight: 500;
-            color: #8C827A;
-            padding: 8px !important;
-        }
-
+        .fc .fc-button-primary:hover { background: var(--lilac); }
+        .fc .fc-button-primary:disabled { opacity: 0.5; }
+        .fc-col-header-cell-cushion, .fc-daygrid-day-number { color: var(--ink-soft); text-decoration: none; font-weight: 500; }
         .fc-event {
-            border: none !important;
-            border-radius: 8px !important;
-            padding: 4px 8px !important;
-            font-size: 0.85rem !important;
-            font-weight: 500 !important;
-            color: #333333 !important;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border-width: 2px; border-radius: 8px; padding: 2px 6px;
+            font-size: 0.82rem; font-weight: 500; color: var(--ink); cursor: pointer;
+        }
+        .fc-event.ev-review { background: #fff !important; border-style: dashed; }
+
+        .legend { display: flex; gap: 18px; margin-top: 14px; font-size: 0.85rem; color: var(--ink-soft); }
+        .legend span { display: inline-flex; align-items: center; gap: 8px; }
+        .legend i { width: 22px; height: 12px; border-radius: 4px; background: var(--lilac); }
+        .legend i.dashed { background: #fff; border: 2px dashed var(--lilac-strong); }
+
+        /* ---------- dialog + toast ---------- */
+        dialog {
+            border: none; border-radius: 24px; padding: 26px;
+            width: min(420px, calc(100vw - 40px));
+            color: var(--ink); background: var(--paper);
+            box-shadow: 0 30px 60px rgba(58, 55, 82, 0.25);
+        }
+        dialog::backdrop { background: rgba(58, 55, 82, 0.28); backdrop-filter: blur(3px); }
+        dialog h3 { font-family: var(--serif); font-size: 1.4rem; margin: 10px 0 14px; }
+        .tag { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 600; background: var(--c); }
+        dl { margin: 0 0 18px; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; }
+        dt { color: var(--ink-soft); }
+        dd { margin: 0; font-weight: 500; }
+        .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        #toast {
+            position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom));
+            transform: translate(-50%, 20px);
+            background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 14px;
+            font-size: 0.95rem; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease; max-width: calc(100vw - 40px);
+        }
+        #toast.show { opacity: 1; transform: translate(-50%, 0); }
+        #toast.error { background: var(--rose-deep); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pulse path { animation: none; stroke-dashoffset: 0; }
+            #toast, .btn { transition: none; }
         }
     </style>
 </head>
 <body>
+<div class="wrap">
 
-    <header>
-        <h1>✿ Medical Study Companion ✿</h1>
-        <p>Keep track of your studies & review on time</p>
+    <header class="top">
+        <div>
+            <h1>Med Study Planner</h1>
+            <p>Log what you studied. Review it before you forget it.</p>
+        </div>
+        <svg class="pulse" viewBox="0 0 240 48" aria-hidden="true">
+            <path pathLength="1" d="M2 28 H66 L78 28 L86 8 L97 42 L107 18 L115 28 H168 L178 28 L185 17 L192 28 H238"/>
+        </svg>
     </header>
 
-    <!-- Revision Reminder Box -->
-    <div id="reminder-box" class="reminder-card">
-        <h3>✨ Time to Review! (3 Days Spaced Repetition)</h3>
-        <ul id="reminder-list" class="reminder-list"></ul>
-    </div>
+    <section class="stats" aria-label="Your progress">
+        <div class="stat due"><b id="stat-due">0</b><span>Due for review</span></div>
+        <div class="stat"><b id="stat-total">0</b><span>Topics logged</span></div>
+        <div class="stat"><b id="stat-streak">0</b><span>Day study streak</span></div>
+        <div class="stat"><b id="stat-mastered">0</b><span>Topics mastered</span></div>
+    </section>
 
-    <div class="app-grid">
-        <!-- Input Form -->
-        <div class="card">
-            <h2 class="form-title">Log Today's Topic</h2>
-            <form id="study-form">
-                <div class="form-group">
-                    <label for="subject">Subject</label>
-                    <select id="subject" required>
-                        <option value="Anatomy">Anatomy (Pastel Red)</option>
-                        <option value="Biochemistry">Biochemistry (Pastel Green)</option>
-                        <option value="Physiology">Physiology (Pastel Orange)</option>
-                    </select>
-                </div>
+    <div class="filters" id="filters" role="group" aria-label="Filter by subject"></div>
 
-                <div class="form-group">
-                    <label for="subtopic">Sub-topic</label>
-                    <input type="text" id="subtopic" placeholder="e.g., Upper Limb / Glycolysis" required autocomplete="off">
-                </div>
+    <div class="grid">
+        <div class="side">
+            <section class="card" aria-labelledby="due-title">
+                <h2 id="due-title">Ready to review</h2>
+                <p class="sub" id="due-sub"></p>
+                <ul class="due-list" id="due-list"></ul>
+                <p class="empty" id="due-empty">Nothing is due. Topics you log show up here 3 days after you study them.</p>
+            </section>
 
-                <div class="form-group">
-                    <label for="date_studied">Date Studied</label>
-                    <input type="date" id="date_studied" required>
-                </div>
-
-                <button type="submit" class="btn-submit">Add to Calendar ✦</button>
-            </form>
+            <section class="card" aria-labelledby="form-title">
+                <h2 id="form-title">Log a topic</h2>
+                <p class="sub">What did you study today?</p>
+                <form id="study-form">
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <select id="subject" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subtopic">Sub-topic</label>
+                        <input type="text" id="subtopic" maxlength="120" placeholder="e.g. Brachial plexus, Glycolysis" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="date_studied">Date studied</label>
+                        <input type="date" id="date_studied" required>
+                    </div>
+                    <button type="submit" class="btn block">Add topic</button>
+                    <p class="hint">Reviews are scheduled at 3, 7, 14 and 30 days.</p>
+                </form>
+            </section>
         </div>
 
-        <!-- Calendar Panel -->
-        <div class="card">
+        <section class="card" aria-label="Study calendar">
             <div id="calendar"></div>
-        </div>
+            <div class="legend">
+                <span><i></i>Studied</span>
+                <span><i class="dashed"></i>Review planned</span>
+            </div>
+        </section>
     </div>
+</div>
 
-    <!-- FullCalendar JS -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set today's date in date picker by default
-            var todayStr = new Date().toISOString().substring(0, 10);
-            document.getElementById('date_studied').value = todayStr;
+<dialog id="details" aria-labelledby="d-title">
+    <span class="tag" id="d-tag"></span>
+    <h3 id="d-title"></h3>
+    <dl>
+        <dt>Studied</dt><dd id="d-studied"></dd>
+        <dt>Next review</dt><dd id="d-next"></dd>
+        <dt>Progress</dt><dd id="d-progress"></dd>
+    </dl>
+    <div class="actions">
+        <button class="btn" id="d-review" type="button">Mark as reviewed</button>
+        <button class="btn danger" id="d-delete" type="button">Delete</button>
+        <button class="btn small" id="d-close" type="button">Close</button>
+    </div>
+</dialog>
 
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth'
-                },
-                height: 'auto'
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var state = { logs: [], reminders: [], subjects: {}, filter: 'all', open: null };
+
+    function $(id) { return document.getElementById(id); }
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function localISO(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+    function today() { return localISO(new Date()); }
+    function fmt(iso) {
+        var p = iso.split('-').map(Number);
+        return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    function el(tag, cls, text) {
+        var e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (text !== undefined) e.textContent = text;
+        return e;
+    }
+    function visible(log) { return state.filter === 'all' || log.subject === state.filter; }
+
+    var toastTimer;
+    function toast(msg, isError) {
+        var t = $('toast');
+        t.textContent = msg;
+        t.className = 'show' + (isError ? ' error' : '');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { t.className = ''; }, 3200);
+    }
+
+    function api(url, options) {
+        return fetch(url, options).then(function (res) {
+            return res.json().then(function (body) {
+                if (!res.ok) throw new Error(body.message || 'Something went wrong.');
+                return body;
             });
-            calendar.render();
+        });
+    }
 
-            function loadData() {
-                fetch('/get_data')
-                .then(res => res.json())
-                .then(data => {
-                    calendar.removeAllEvents();
+    function stepDots(log) {
+        var wrap = el('span', 'steps');
+        wrap.setAttribute('aria-hidden', 'true');
+        for (var i = 0; i < log.total_stages; i++) wrap.appendChild(el('i', i < log.stage ? 'on' : ''));
+        return wrap;
+    }
 
-                    data.study_logs.forEach(item => {
-                        calendar.addEvent({
-                            title: item.subject + ': ' + item.subtopic,
-                            start: item.date_studied,
-                            backgroundColor: item.color,
-                            textColor: '#2D2727'
-                        });
-                    });
+    // ---------- calendar ----------
+    var calendar = new FullCalendar.Calendar($('calendar'), {
+        initialView: 'dayGridMonth',
+        headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+        height: 'auto',
+        dayMaxEvents: 3,
+        eventClick: function (info) { openDetails(info.event.extendedProps.id); }
+    });
+    calendar.render();
 
-                    // Manage Revision Reminders
-                    if (data.reminders.length > 0) {
-                        var alertBox = document.getElementById('reminder-box');
-                        var reminderList = document.getElementById('reminder-list');
-                        reminderList.innerHTML = '';
-
-                        data.reminders.forEach(r => {
-                            var li = document.createElement('li');
-                            li.innerHTML = `<strong>${r.subject}</strong>: ${r.subtopic} <i>(Studied on ${r.date_studied})</i>`;
-                            reminderList.appendChild(li);
-                        });
-                        alertBox.style.display = 'block';
-                    }
+    function renderCalendar() {
+        calendar.removeAllEvents();
+        state.logs.filter(visible).forEach(function (log) {
+            calendar.addEvent({
+                title: (log.mastered ? '✓ ' : '') + log.subtopic,
+                start: log.date_studied,
+                backgroundColor: log.color,
+                borderColor: log.color,
+                textColor: '#3A3752',
+                extendedProps: { id: log.id }
+            });
+            if (log.next_review) {
+                calendar.addEvent({
+                    title: 'Review: ' + log.subtopic,
+                    start: log.next_review,
+                    borderColor: log.color,
+                    textColor: '#3A3752',
+                    classNames: ['ev-review'],
+                    extendedProps: { id: log.id }
                 });
             }
-
-            document.getElementById('study-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                var payload = {
-                    subject: document.getElementById('subject').value,
-                    subtopic: document.getElementById('subtopic').value,
-                    date_studied: document.getElementById('date_studied').value
-                };
-
-                fetch('/add_study', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                })
-                .then(res => res.json())
-                .then(res => {
-                    if (res.status === 'success') {
-                        loadData();
-                        document.getElementById('subtopic').value = '';
-                    }
-                });
-            });
-
-            loadData();
         });
-    </script>
+    }
+
+    // ---------- stats ----------
+    function streak() {
+        var days = {};
+        state.logs.forEach(function (l) { days[l.date_studied] = true; });
+        var d = new Date();
+        if (!days[localISO(d)]) d.setDate(d.getDate() - 1);  // today not logged yet: keep yesterday's streak alive
+        var count = 0;
+        while (days[localISO(d)]) { count++; d.setDate(d.getDate() - 1); }
+        return count;
+    }
+
+    function renderStats() {
+        $('stat-due').textContent = state.reminders.length;
+        $('stat-total').textContent = state.logs.length;
+        $('stat-streak').textContent = streak();
+        $('stat-mastered').textContent = state.logs.filter(function (l) { return l.mastered; }).length;
+    }
+
+    // ---------- filter chips ----------
+    function renderFilters() {
+        var box = $('filters');
+        box.innerHTML = '';
+        var names = ['all'].concat(Object.keys(state.subjects));
+        names.forEach(function (name) {
+            var b = el('button', 'chip');
+            b.type = 'button';
+            b.setAttribute('aria-pressed', String(state.filter === name));
+            if (name !== 'all') b.style.setProperty('--c', state.subjects[name]);
+            b.appendChild(el('i'));
+            b.appendChild(document.createTextNode(name === 'all' ? 'All subjects' : name));
+            b.addEventListener('click', function () { state.filter = name; render(); });
+            box.appendChild(b);
+        });
+    }
+
+    // ---------- due list ----------
+    function renderDue() {
+        var list = $('due-list');
+        list.innerHTML = '';
+        var items = state.reminders.filter(visible);
+
+        $('due-empty').style.display = items.length ? 'none' : 'block';
+        $('due-sub').textContent = items.length
+            ? items.length + (items.length === 1 ? ' topic is' : ' topics are') + ' waiting for you.'
+            : '';
+
+        items.forEach(function (log) {
+            var li = el('li', 'due-item');
+            li.style.setProperty('--c', log.color);
+
+            li.appendChild(el('span', 'name', log.subtopic));
+
+            var meta = el('span', 'meta');
+            var late = log.days_overdue > 0
+                ? log.days_overdue + (log.days_overdue === 1 ? ' day overdue' : ' days overdue')
+                : 'due today';
+            meta.appendChild(document.createTextNode(log.subject + ', ' + late));
+            meta.appendChild(stepDots(log));
+            li.appendChild(meta);
+
+            var btn = el('button', 'btn small', 'Reviewed');
+            btn.type = 'button';
+            btn.addEventListener('click', function () { markReviewed(log.id); });
+            li.appendChild(btn);
+
+            list.appendChild(li);
+        });
+    }
+
+    function render() {
+        renderStats();
+        renderFilters();
+        renderDue();
+        renderCalendar();
+    }
+
+    // ---------- data ----------
+    function loadData() {
+        return api('/get_data?today=' + today()).then(function (data) {
+            state.logs = data.study_logs;
+            state.reminders = data.reminders;
+            if (!Object.keys(state.subjects).length) fillSubjects(data.subjects);
+            state.subjects = data.subjects;
+            render();
+        }).catch(function (e) { toast(e.message, true); });
+    }
+
+    function fillSubjects(subjects) {
+        var select = $('subject');
+        Object.keys(subjects).forEach(function (name) {
+            var o = el('option', '', name);
+            o.value = name;
+            select.appendChild(o);
+        });
+    }
+
+    function markReviewed(id) {
+        api('/review/' + id, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ today: today() })
+        }).then(function (res) {
+            toast(res.mastered ? 'Mastered. This topic is finished.' : 'Reviewed. Next review on ' + fmt(res.next_review) + '.');
+            closeDetails();
+            return loadData();
+        }).catch(function (e) { toast(e.message, true); });
+    }
+
+    function deleteLog(id) {
+        if (!confirm('Delete this topic and its reviews?')) return;
+        api('/delete/' + id, { method: 'DELETE' }).then(function () {
+            toast('Topic deleted.');
+            closeDetails();
+            return loadData();
+        }).catch(function (e) { toast(e.message, true); });
+    }
+
+    // ---------- details dialog ----------
+    var dialog = $('details');
+
+    function openDetails(id) {
+        var log = state.logs.find(function (l) { return l.id === id; });
+        if (!log) return;
+        state.open = id;
+        $('d-tag').textContent = log.subject;
+        $('d-tag').style.setProperty('--c', log.color);
+        $('d-title').textContent = log.subtopic;
+        $('d-studied').textContent = fmt(log.date_studied);
+        $('d-next').textContent = log.mastered ? 'None, mastered' : fmt(log.next_review);
+
+        var progress = $('d-progress');
+        progress.innerHTML = '';
+        progress.appendChild(document.createTextNode(log.stage + ' of ' + log.total_stages + ' reviews'));
+        progress.appendChild(stepDots(log));
+
+        $('d-review').style.display = log.mastered ? 'none' : '';
+        if (typeof dialog.showModal === 'function') dialog.showModal(); else dialog.setAttribute('open', '');
+    }
+
+    function closeDetails() { state.open = null; if (dialog.open) dialog.close(); }
+
+    $('d-close').addEventListener('click', closeDetails);
+    $('d-review').addEventListener('click', function () { markReviewed(state.open); });
+    $('d-delete').addEventListener('click', function () { deleteLog(state.open); });
+    dialog.addEventListener('click', function (e) { if (e.target === dialog) closeDetails(); });
+
+    // ---------- form ----------
+    $('date_studied').value = today();
+
+    $('study-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var payload = {
+            subject: $('subject').value,
+            subtopic: $('subtopic').value,
+            date_studied: $('date_studied').value
+        };
+        api('/add_study', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(function () {
+            $('subtopic').value = '';
+            toast('Added. First review is in 3 days.');
+            return loadData();
+        }).catch(function (err) { toast(err.message, true); });
+    });
+
+    loadData();
+});
+</script>
 </body>
 </html>
